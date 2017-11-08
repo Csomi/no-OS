@@ -1,0 +1,6 @@
+<map id="iio_axi_adc_desc" name="iio_axi_adc_desc">
+<area shape="rect" id="node1" title="iio_axi_adc_descriptor" alt="" coords="15,184,147,211"/>
+<area shape="rect" id="node2" href="$structaxi__adc.html" title=" " alt="" coords="5,95,77,121"/>
+<area shape="rect" id="node3" href="$structaxi__dmac.html" title=" " alt="" coords="101,95,187,121"/>
+<area shape="rect" id="node4" href="$structaxi__dma__transfer.html" title=" " alt="" coords="76,5,212,32"/>
+</map>

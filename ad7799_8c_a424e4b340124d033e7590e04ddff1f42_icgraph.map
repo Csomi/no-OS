@@ -1,0 +1,5 @@
+<map id="ad7799_set_mode" name="ad7799_set_mode">
+<area shape="rect" id="node1" title="Set the device mode." alt="" coords="444,5,585,32"/>
+<area shape="rect" id="node2" href="$ad7799_8h.html#a078b67608f7960dbe19be8d97cd2dea3" title="Read specific ADC channel." alt="" coords="240,5,396,32"/>
+<area shape="rect" id="node3" href="$iio__ad7799_8c.html#a16354015b948bf8583e3e4578fac6655" title="Read ADC Channel data." alt="" coords="5,5,192,32"/>
+</map>

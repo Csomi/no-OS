@@ -1,0 +1,15 @@
+<map id="iio/iio_adxrs290/iio_adxrs290.c" name="iio/iio_adxrs290/iio_adxrs290.c">
+<area shape="rect" id="node1" title="Implementation of ADXRS290 iio." alt="" coords="273,5,418,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,99,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="123,95,194,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="219,95,285,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="310,95,381,121"/>
+<area shape="rect" id="node6" href="$adxrs290_8h.html" title="Implementation of ADXRS290 Driver." alt="" coords="457,95,551,121"/>
+<area shape="rect" id="node11" href="$util_8h.html" title="Implementation of utility functions." alt="" coords="366,169,421,196"/>
+<area shape="rect" id="node12" href="$error_8h.html" title="Error codes definition." alt="" coords="632,95,696,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="369,244,452,271"/>
+<area shape="rect" id="node8" href="$gpio_8h.html" title="Header file of GPIO Interface." alt="" coords="497,169,559,196"/>
+<area shape="rect" id="node10" href="$spi_8h.html" title="Header file of SPI Interface." alt="" coords="584,169,637,196"/>
+<area shape="rect" id="node9" title=" " alt="" coords="493,244,563,271"/>
+<area shape="rect" id="node13" title=" " alt="" coords="662,169,730,196"/>
+</map>
