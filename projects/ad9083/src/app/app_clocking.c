@@ -207,7 +207,7 @@ int32_t app_clocking_init(uint32_t device_clock_khz,
 	ad9528_clk_set_rate(clkchip_device, ADC_REF_CLK, dev_ref_clk);
 
 	/* If the current rate is not OK, change it */
-	if (!(ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev) && ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (!(app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev) &&
 	      (rate_fmc == rate_dev))) {
 		/*
 		* Try to find a rate that integer divides the LMFC. Starting with a low
@@ -217,7 +217,7 @@ int32_t app_clocking_init(uint32_t device_clock_khz,
 		for (n = 64; n > 0; n--) {
 			rate_dev = ad9528_clk_round_rate(clkchip_device, ADC_SYSREF_CLK, lmfc_rate_hz / n);
 
-			if (ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev))
+			if (app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev))
 				break;
 		}
 

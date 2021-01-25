@@ -33,7 +33,7 @@
 #include "app_clocking.h"
 #include "app_jesd.h"
 #include "app_transceiver.h"
-#include "app.h"
+#include "app_ad9083.h"
 #include "ad9528.h"
 
 #ifdef IIO_SUPPORT
@@ -81,47 +81,22 @@ static ssize_t iio_uart_read(char *buf, size_t len)
 int main(void)
 {
 //	adiHalErr_t err;
-	int status;
+	int32_t status;
 	struct ad9083_phy *ad9083_phy;
-
-	struct xil_spi_init_param xil_spi_param = {
-		.type = SPI_PS,
-		.device_id = 0,
-//		.flags = SPI_CS_DECODE
-	};
-
-	// clock chip spi settings
-	struct spi_init_param ad9083_spi_init_param = {
-		.max_speed_hz = 10000000,
-		.mode = SPI_MODE_0,
-		.chip_select = SPI_AD9083_CS,
-
-		.platform_ops = &xil_platform_ops,
-		.extra = &xil_spi_param
-	};
-	struct xil_gpio_init_param  xil_gpio_param = {
-		.type = GPIO_PS,
-		.device_id = GPIO_DEVICE_ID
-	};
-	struct gpio_init_param	gpio_phy_resetb = {
-		.number = AD9528_RSTB,
-		.platform_ops = &xil_gpio_platform_ops,
-		.extra = &xil_gpio_param
-	};
-
-	struct ad9083_init_param ad9083_init_param = {
-		.spi_init = &ad9083_spi_init_param,
-		.gpio_reset = &gpio_phy_resetb,
-	};
+	uint32_t deviceClock_kHz = 40000000;
+	uint32_t lmfc_rate = 10000000;
 
 	printf("Hello\n");
-	status = app_clocking_init(500000, 250000, 250000, 10000000, 10000000);
+
+	status = app_clocking_init(deviceClock_kHz, lmfc_rate);
 	if (status != SUCCESS)
 		printf("app_clock_init() error: %" PRId32 "\n", status);
 
-//	status = ad9083_init(&ad9083_phy, &ad9083_init_param);
-//	if (status != SUCCESS)
-//		printf("ad9083_initialize() error: %" PRId32 "\n", status);
+	status = app_ad9083_init();
+	if (status != SUCCESS)
+		printf("app_clock_init() error: %" PRId32 "\n", status);
+
+
 
 
 //	status = app_jesd_init(jesd_clk,
