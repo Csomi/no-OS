@@ -41,11 +41,8 @@
 
 #include <stdint.h>
 
-int32_t app_clocking_init(uint32_t rx_div40_rate_hz,
-			  uint32_t tx_div40_rate_hz,
-			  uint32_t rx_os_div40_rate_hz,
-			  uint32_t device_clock_khz,
-			  uint32_t lmfc_rate_hz);
+int32_t app_clocking_init(uint32_t device_clock_khz,
+		  uint32_t lmfc_rate_hz);
 
 void app_clocking_deinit(void);
 
