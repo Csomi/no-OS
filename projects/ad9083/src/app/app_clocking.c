@@ -116,13 +116,13 @@ int32_t app_clocking_init(uint32_t rx_div40_rate_hz,
 	ad9528_channels[0].divider_phase = 0;
 	ad9528_channels[0].signal_source = SOURCE_VCO;
 
-	// GLBLCLK
+	// GLBLCLK to FPGA
 	ad9528_channels[1].output_dis = 0;
 	ad9528_channels[1].driver_mode = DRIVER_MODE_LVDS;
 	ad9528_channels[1].divider_phase = 0;
 	ad9528_channels[1].signal_source = SOURCE_VCO;
 
-	// REFCLK
+	// REFCLK to FPGA
 	ad9528_channels[3].output_dis = 0;
 	ad9528_channels[3].driver_mode = DRIVER_MODE_LVDS;
 	ad9528_channels[3].divider_phase = 0;
@@ -133,6 +133,12 @@ int32_t app_clocking_init(uint32_t rx_div40_rate_hz,
 	ad9528_channels[12].driver_mode = DRIVER_MODE_LVDS;
 	ad9528_channels[12].divider_phase = 0;
 	ad9528_channels[12].signal_source = SOURCE_SYSREF_VCO;
+
+	// ADC CLK reference, used for ADC sample clock and JESD
+	ad9528_channels[13].output_dis = 0;
+	ad9528_channels[13].driver_mode = DRIVER_MODE_LVDS;
+	ad9528_channels[13].divider_phase = 0;
+	ad9528_channels[13].signal_source = SOURCE_SYSREF_VCO;
 
 	// ad9528 settings
 	ad9528_param.pdata->spi3wire = 1;
@@ -145,7 +151,7 @@ int32_t app_clocking_init(uint32_t rx_div40_rate_hz,
 	ad9528_param.pdata->pll1_feedback_src_vcxo = 0; /* VCO */
 	ad9528_param.pdata->pll1_charge_pump_current_nA = 5000;
 	ad9528_param.pdata->pll1_bypass_en = 0;
-	ad9528_param.pdata->pll2_vco_div_m1 = 3;
+	ad9528_param.pdata->pll2_vco_div_m1 = 4;
 	ad9528_param.pdata->pll2_n2_div = 10;
 	ad9528_param.pdata->pll2_r1_div = 1;
 	ad9528_param.pdata->pll2_charge_pump_current_nA = 805000;
@@ -158,14 +164,13 @@ int32_t app_clocking_init(uint32_t rx_div40_rate_hz,
 	ad9528_param.pdata->rpole2 = RPOLE2_900_OHM;
 	ad9528_param.pdata->rzero = RZERO_1850_OHM;
 	ad9528_param.pdata->cpole1 = CPOLE1_16_PF;
-	ad9528_param.pdata->stat0_pin_func_sel = 0x1; /* PLL1 & PLL2 Locked */
-	ad9528_param.pdata->stat1_pin_func_sel = 0x7; /* REFA Correct */
-
+	/* Status pin function selection */
+	ad9528_param.pdata->stat0_pin_func_sel = 0xFF; /* No funtion */
+	ad9528_param.pdata->stat1_pin_func_sel = 0xFF; /* No function */
 
 	struct xil_spi_init_param xil_spi_param = {
 		.type = SPI_PS,
 		.device_id = 0,
-//		.flags = SPI_CS_DECODE
 	};
 
 	struct xil_gpio_init_param xil_gpio_param = {
