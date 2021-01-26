@@ -94,6 +94,10 @@ struct ad9083_phy {
 	spi_desc 	*spi_desc;
 	/* GPIO */
 	gpio_desc	*gpio_reset;
+	/* GPIO power down */
+	gpio_desc	*gpio_pd;
+	/* GPIO reference selection */
+	gpio_desc	*gpio_ref_sel;
 	struct clk		*jesd_rx_clk;
 	struct clk		*jesd_tx_clk;
 	struct clk		*dev_clk;
@@ -135,8 +139,12 @@ struct ad9083_phy {
 struct ad9083_init_param {
 	/* SPI */
 	spi_init_param	*spi_init;
-	/* GPIO */
+	/* GPIO reset */
 	gpio_init_param	*gpio_reset;
+	/* GPIO power down */
+	gpio_init_param	*gpio_pd;
+	/* GPIO reference selection */
+	gpio_init_param	*gpio_ref_sel;
 	struct clk	*dev_clk;
 	struct clk	*jesd_rx_clk;
 	struct clk	*jesd_tx_clk;

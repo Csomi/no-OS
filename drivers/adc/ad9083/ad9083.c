@@ -47,8 +47,9 @@
 #include "ad9083.h"
 #include "error.h"
 #include <inttypes.h>
+#include "adi_ad9083_hal.h"
 
-#define CHIPID_AD9083	0x9083
+#define CHIPID_AD9083	0x00EA
 #define CHIPID_MASK	0xFFFF
 
 /**
@@ -442,7 +443,13 @@ int32_t ad9083_init(struct ad9083_phy **device, struct ad9083_init_param *init_p
 	if (!phy)
 		return -ENOMEM;
 
-	ret = gpio_get(&phy->gpio_reset, init_param->gpio_reset);
+	ret = gpio_get_optional(&phy->gpio_reset, init_param->gpio_reset);
+	if (ret < 0)
+		goto error_1;
+	ret = gpio_get_optional(&phy->gpio_ref_sel, init_param->gpio_ref_sel);
+	if (ret < 0)
+		goto error_1;
+	ret = gpio_get_optional(&phy->gpio_pd, init_param->gpio_pd);
 	if (ret < 0)
 		goto error_1;
 
@@ -460,38 +467,27 @@ int32_t ad9083_init(struct ad9083_phy **device, struct ad9083_init_param *init_p
 	phy->ad9083.hal_info.user_data = phy;
 	phy->ad9083.hal_info.delay_us = ad9083_udelay;
 	phy->ad9083.hal_info.reset_pin_ctrl = ad9083_reset_pin_ctrl;
-	phy->ad9083.hal_info.sdo = SPI_SDO;
+	phy->ad9083.hal_info.sdo = SPI_SDIO;
 	phy->ad9083.hal_info.msb = SPI_MSB_FIRST;
 	phy->ad9083.hal_info.addr_inc = SPI_ADDR_INC_AUTO;
 	phy->ad9083.hal_info.spi_xfer = ad9083_spi_xfer;
 	phy->ad9083.hal_info.log_write = ad9083_log_write;
-//
-//	ret = gpio_direction_output(phy->gpio_reset, 1);
-//	if (ret < 0)
-//		goto error_3;
-//	adi_ad9083_device_reset(&phy->ad9083, AD9083_HARD_RESET_AND_INIT);
-//	if (ret < 0) {
-//		printf("%s: reset/init failed (%"PRId32")\n", __func__, ret);
-//		goto error_3;
-//	}
-	uint8_t reg_val = 0x0, i = 0;
-while (1) {
-		for (i = 0; i < 15; i++) {
 
-			adi_ad9083_hal_reg_set(&phy->ad9083, 0x00000B91, i);
-			adi_ad9083_hal_reg_get(&phy->ad9083, 0x00000B91, &reg_val);
-		}
+	if (ret < 0)
+		goto error_3;
+	/* software reset, resistor is not mounted */
+	ret = adi_ad9083_device_reset(&phy->ad9083, AD9083_SOFT_RESET_AND_INIT);
+	if (ret < 0) {
+		printf("%s: reset/init failed (%"PRId32")\n", __func__, ret);
+		goto error_3;
+	}
 
-		ret = adi_ad9083_device_chip_id_get(&phy->ad9083, &chip_id);
-		if (ret < 0) {
-			printf("%s: chip_id failed (%"PRId32")\n", __func__, ret);
-	//		goto error_3;
+	ret = adi_ad9083_device_chip_id_get(&phy->ad9083, &chip_id);
+	if (ret < 0) {
+		printf("%s: chip_id failed (%"PRId32")\n", __func__, ret);
+		goto error_3;
 	}
-	else {
-		printf("chip_id failed OK\n");
-//		goto error_3;
-	}
-}
+
 	if ((chip_id.prod_id & CHIPID_MASK) != CHIPID_AD9083) {
 		printf("%s: Unrecognized CHIP_ID 0x%X\n", __func__,
 		       chip_id.prod_id);
@@ -511,6 +507,8 @@ while (1) {
 	printf("AD9083 Rev. %u Grade %u (API %u.%u.%u) probed\n",
 	       chip_id.dev_revision, chip_id.prod_grade,
 	       api_rev[0], api_rev[1], api_rev[2]);
+
+	return SUCCESS;
 
 error_3:
 	spi_remove(phy->spi_desc);
