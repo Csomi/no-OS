@@ -49,6 +49,20 @@
 #include <inttypes.h>
 #include "adi_ad9083_hal.h"
 
+extern uint64_t clk_hz[][3];
+extern uint32_t vmax[];
+extern uint32_t fc[];
+extern uint8_t  rterm[];
+extern uint32_t en_hp[];
+extern uint32_t backoff[];
+extern uint32_t finmax[];
+extern uint64_t nco_freq_hz[][3];
+extern uint8_t  decimation[][4];
+extern uint8_t  nco0_datapath_mode[];
+extern adi_cms_jesd_param_t jtx_param[];
+extern int32_t adi_ad9083_jtx_startup(adi_ad9083_device_t *device,
+                               adi_cms_jesd_param_t *jtx_param);
+
 #define CHIPID_AD9083	0x00EA
 #define CHIPID_MASK	0xFFFF
 
@@ -422,6 +436,41 @@ int32_t ad9083_parse_init_param(struct ad9083_phy *phy,
 
 static int32_t ad9083_setup(struct ad9083_phy *phy)
 {
+	int32_t ret;
+	uint64_t dev_frequency_hz;
+	uint8_t uc = 0;
+//	ret = adi_ad9083_device_clock_config_set(
+//			      &phy->ad9083, phy-> adc_frequency_hz,
+//			      dev_frequency_hz);
+
+	ret = adi_ad9083_device_clock_config_set(&phy->ad9083, clk_hz[uc][2], clk_hz[uc][0]);
+	if (ret != 0)
+		return ret;
+
+	ret = adi_ad9083_rx_adc_config_set(&phy->ad9083, vmax[uc], fc[uc], rterm[uc], en_hp[uc], backoff[uc], finmax[uc]);
+	if (ret != 0)
+		return ret;
+	/* setup aegir datapath */
+	ret = adi_ad9083_rx_datapath_config_set(&phy->ad9083, nco0_datapath_mode[uc], decimation[uc], nco_freq_hz[uc]);
+	if (ret != 0)
+		return ret;
+	/* startup aegir jesd */
+	ret = adi_ad9083_jtx_startup(&phy->ad9083, &jtx_param[uc]);
+	if (ret != 0)
+		return ret;
+//
+//	ret = adi_ad9083_rx_adc_config_set(&phy->ad9083);
+//	if (ret != 0)
+//		return ret;
+//
+//	ret = adi_ad9083_rx_datapath_config_set(&phy->ad9083);
+//	if (ret != 0)
+//		return ret;
+//
+//	ret = adi_ad9083_jtx_startup(&phy->ad9083);
+//	if (ret != 0)
+//		return ret;
+
 	return SUCCESS;
 }
 

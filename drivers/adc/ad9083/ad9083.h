@@ -98,9 +98,8 @@ struct ad9083_phy {
 	gpio_desc	*gpio_pd;
 	/* GPIO reference selection */
 	gpio_desc	*gpio_ref_sel;
-	struct clk		*jesd_rx_clk;
-	struct clk		*jesd_tx_clk;
-	struct clk		*dev_clk;
+	/* RX */
+	uint64_t 	adc_frequency_hz;
 	adi_ad9083_device_t	ad9083;
 };
 
