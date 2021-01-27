@@ -21,7 +21,7 @@
 #include "delay.h"
 #include "parameters.h"
 #include "util.h"
-//#include "axi_dac_core.h"
+#include "axi_jesd204_tx.h"
 #include "axi_adc_core.h"
 #include "axi_dmac.h"
 #ifndef ALTERA_PLATFORM
@@ -32,7 +32,6 @@
 #include "app_config.h"
 #include "app_clocking.h"
 #include "app_jesd.h"
-#include "app_transceiver.h"
 #include "app_ad9083.h"
 #include "ad9528.h"
 
@@ -77,7 +76,7 @@ static ssize_t iio_uart_read(char *buf, size_t len)
 /********** Talise Data Structure Initializations ********/
 /**********************************************************/
 /**********************************************************/
-
+extern struct axi_jesd204_rx *rx_jesd;
 int main(void)
 {
 //	adiHalErr_t err;
@@ -89,20 +88,31 @@ int main(void)
 	printf("Hello\n");
 
 	status = app_clocking_init(deviceClock_kHz, lmfc_rate);
-	if (status != SUCCESS)
+	if (status != SUCCESS) {
 		printf("app_clock_init() error: %" PRId32 "\n", status);
+
+		return FAILURE;
+	}
+
+	status = app_jesd_init();
+	if (status != SUCCESS) {
+		printf("app_jesd_init() error: %" PRId32 "\n", status);
+
+		return FAILURE;
+	}
 
 	status = app_ad9083_init();
-	if (status != SUCCESS)
+	if (status != SUCCESS) {
 		printf("app_clock_init() error: %" PRId32 "\n", status);
 
+		return FAILURE;
+	}
 
+	status = axi_jesd204_tx_status_read(rx_jesd);
+	if (status != SUCCESS) {
+		printf("axi_jesd204_tx_status_read() error: %"PRIi32"\n", status);
+	}
 
-
-//	status = app_jesd_init(jesd_clk,
-//			       500000, 250000, 250000, 10000000, 10000000);
-//	if (status != SUCCESS)
-//		printf("app_jesd_init() error: %" PRId32 "\n", status);
 
 	printf("Bye\n");
 	return SUCCESS;

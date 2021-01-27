@@ -1,9 +1,9 @@
 /***************************************************************************//**
  *   @file   app_jesd.h
- *   @brief  JESD setup and initialization routines.
- *   @author Darius Berghe (darius.berghe@analog.com)
+ *   @brief  Application JESD initialization.
+ *   @author DBogdan (dragos.bogdan@analog.com)
 ********************************************************************************
- * Copyright 2019(c) Analog Devices, Inc.
+ * Copyright 2020(c) Analog Devices, Inc.
  *
  * All rights reserved.
  *
@@ -36,22 +36,26 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-#ifndef __APP_JESD_H
-#define __APP_JESD_H
+#ifndef APP_JESD_H_
+#define APP_JESD_H_
 
+/******************************************************************************/
+/***************************** Include Files **********************************/
+/******************************************************************************/
 #include <stdint.h>
-//#include "adi_hal.h"
+#include "clk.h"
 
-extern struct axi_jesd204_rx *rx_jesd;
-extern struct axi_jesd204_tx *tx_jesd;
-extern struct axi_jesd204_rx *rx_os_jesd;
+enum jesd_clocks {
+	JESD_RX,
+	JESD_TX,
+	NUM_JESD_CLKS
+};
 
-int32_t jesd_init(uint32_t rx_div40_rate_hz,
-		      uint32_t tx_div40_rate_hz,
-		      uint32_t rx_os_div40_rate_hz);
+/******************************************************************************/
+/************************ Functions Declarations ******************************/
+/******************************************************************************/
 
-void jesd_deinit(void);
-void jesd_status(void);
-void jesd_rx_watchdog(void);
+/* @brief Application JESD initialization. */
+int32_t app_jesd_init(void);
 
-#endif /* __APP_JESD_H */
+#endif

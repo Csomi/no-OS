@@ -1,9 +1,9 @@
 /***************************************************************************//**
  *   @file   app_jesd.c
- *   @brief  JESD setup and initialization routines.
- *   @author Darius Berghe (darius.berghe@analog.com)
+ *   @brief  Application JESD setup.
+ *   @author DBogdan (dragos.bogdan@analog.com)
 ********************************************************************************
- * Copyright 2019(c) Analog Devices, Inc.
+ * Copyright 2020(c) Analog Devices, Inc.
  *
  * All rights reserved.
  *
@@ -36,82 +36,85 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-// stdlibs
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
+/******************************************************************************/
+/***************************** Include Files **********************************/
+/******************************************************************************/
 
-// platform drivers
-#include "error.h"
-#include "util.h"
-
-// jesd
 #include "axi_jesd204_rx.h"
-#include "axi_jesd204_tx.h"
-
-// hal
+#include "axi_adxcvr.h"
+#include "jesd204_clk.h"
+#include "error.h"
 #include "parameters.h"
-//#include "adi_hal.h"
-
-// header
 #include "app_jesd.h"
+#include "app_config.h"
+#include "stdio.h"
+#include "adi_cms_api_common.h"
+/******************************************************************************/
+/************************ Variables Definitions *******************************/
+/******************************************************************************/
+struct axi_jesd204_rx *rx_jesd;
+struct adxcvr *rx_adxcvr;
 
-struct axi_jesd204_rx *rx_jesd = NULL;
-struct axi_jesd204_tx *tx_jesd = NULL;
-struct axi_jesd204_rx *rx_os_jesd = NULL;
+extern adi_cms_jesd_param_t jtx_param[];
 
-int32_t jesd_init(uint32_t rx_div40_rate_hz,
-		      uint32_t tx_div40_rate_hz,
-		      uint32_t rx_os_div40_rate_hz)
+/******************************************************************************/
+/************************** Functions Implementation **************************/
+/******************************************************************************/
+
+/**
+ * @brief Application JESD setup.
+ * @return SUCCESS in case of success, FAILURE otherwise.
+ */
+int32_t app_jesd_init(void)
 {
+	uint8_t uc = 0;
 	int32_t status;
-	uint32_t rx_lane_rate_khz = rx_div40_rate_hz / 1000 * 40;
+
 	struct jesd204_rx_init rx_jesd_init = {
-		"rx_jesd",
-		RX_JESD_BASEADDR,
-		4,
-		32,
-		1,
-		rx_div40_rate_hz / 1000,
-		rx_lane_rate_khz
+		.name = "rx_jesd",
+		.base = RX_JESD_BASEADDR,
+		.octets_per_frame = jtx_param[uc].jesd_f,
+		.frames_per_multiframe = jtx_param[uc].jesd_n,
+		.subclass = jtx_param[uc].jesd_subclass,
+		.device_clk_khz = 184320,	/* (lane_clk_khz / 40) */
+		.lane_clk_khz = 7372800,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
 	};
 
+	struct adxcvr_init rx_adxcvr_init = {
+		.name = "rx_adxcvr",
+		.base = RX_XCVR_BASEADDR,
+		.sys_clk_sel = 3,
+		.out_clk_sel = 4,
+		.cpll_enable = 0,
+		.lpm_enable = 1,
+		.lane_rate_khz = 7372800,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
+		.ref_rate_khz = 368640,		/* FPGA_CLK, output 12 of HMC 7044 */
+	};
 
-	/* Initialize JESD */
 	status = axi_jesd204_rx_init(&rx_jesd, &rx_jesd_init);
 	if (status != SUCCESS) {
 		printf("error: %s: axi_jesd204_rx_init() failed\n", rx_jesd_init.name);
-		goto error_5;
+		return FAILURE;
 	}
 
+	status = adxcvr_init(&rx_adxcvr, &rx_adxcvr_init);
+	if (status != SUCCESS) {
+		printf("error: %s: adxcvr_init() failed\n", rx_adxcvr_init.name);
+		return FAILURE;
+	}
+
+	status = adxcvr_clk_enable(rx_adxcvr);
+	if (status != SUCCESS) {
+		printf("error: %s: adxcvr_clk_enable() failed\n", rx_adxcvr->name);
+		return FAILURE;
+	}
+
+	status = axi_jesd204_rx_lane_clk_enable(rx_jesd);
+	if (status != SUCCESS) {
+		printf("error: %s: axi_jesd204_rx_lane_clk_enable() failed\n", rx_jesd->name);
+		return FAILURE;
+	}
 
 	return SUCCESS;
-
-error_5:
-	axi_jesd204_rx_remove(rx_jesd);
-
-	return FAILURE;
 }
-
-void jesd_deinit(void)
-{
-	axi_jesd204_rx_remove(rx_os_jesd);
-	axi_jesd204_tx_remove(tx_jesd);
-	axi_jesd204_rx_remove(rx_jesd);
-}
-
-void jesd_status(void)
-{
-	axi_jesd204_rx_status_read(rx_jesd);
-	axi_jesd204_tx_status_read(tx_jesd);
-	axi_jesd204_rx_status_read(rx_os_jesd);
-}
-
-void jesd_rx_watchdog(void)
-{
-	axi_jesd204_rx_watchdog(rx_jesd);
-	axi_jesd204_rx_watchdog(rx_os_jesd);
-}
-
