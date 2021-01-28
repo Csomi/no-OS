@@ -138,7 +138,7 @@ int32_t app_clocking_init(uint32_t device_clock_khz,
 
 	// ad9528 settings
 	ad9528_param.pdata->spi3wire = 1;
-	ad9528_param.pdata->vcxo_freq = 100000000;//122880000;
+	ad9528_param.pdata->vcxo_freq = 100000000;
 	ad9528_param.pdata->refa_en = 1;
 	ad9528_param.pdata->refa_diff_rcv_en = 1;
 	ad9528_param.pdata->refa_r_div = 1;
@@ -147,8 +147,8 @@ int32_t app_clocking_init(uint32_t device_clock_khz,
 	ad9528_param.pdata->pll1_feedback_src_vcxo = 0; /* VCO */
 	ad9528_param.pdata->pll1_charge_pump_current_nA = 5000;
 	ad9528_param.pdata->pll1_bypass_en = 0;
-	ad9528_param.pdata->pll2_vco_div_m1 = 3;
-	ad9528_param.pdata->pll2_n2_div = 12;
+	ad9528_param.pdata->pll2_vco_div_m1 = 4;
+	ad9528_param.pdata->pll2_n2_div = 10;
 	ad9528_param.pdata->pll2_r1_div = 1;
 	ad9528_param.pdata->pll2_charge_pump_current_nA = 805000;
 	ad9528_param.pdata->pll2_bypass_en = false;
@@ -195,47 +195,50 @@ int32_t app_clocking_init(uint32_t device_clock_khz,
 	}
 
 	fpga_glb_clk = ad9528_clk_round_rate(clkchip_device, FPGA_GLBL_CLK,
-					device_clock_khz * 1000);
+					500000 * 1000);
 	fpga_ref_clk = ad9528_clk_round_rate(clkchip_device, FPGA_REF_CLK,
-					device_clock_khz * 1000);
+					500000 * 1000);
 	dev_ref_clk = ad9528_clk_round_rate(clkchip_device, ADC_REF_CLK,
-					device_clock_khz * 1000);
+					250000 * 1000);
 
 
 	ad9528_clk_set_rate(clkchip_device, FPGA_GLBL_CLK, fpga_glb_clk);
 	ad9528_clk_set_rate(clkchip_device, FPGA_REF_CLK, fpga_ref_clk);
 	ad9528_clk_set_rate(clkchip_device, ADC_REF_CLK, dev_ref_clk);
 
-	/* If the current rate is not OK, change it */
-	if (!(app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev) &&
-	      (rate_fmc == rate_dev))) {
-		/*
-		* Try to find a rate that integer divides the LMFC. Starting with a low
-		* rate is a good idea and then slowly go up in case the clock generator
-		* can't generate such slow rates.
-		*/
-		for (n = 64; n > 0; n--) {
-			rate_dev = ad9528_clk_round_rate(clkchip_device, ADC_SYSREF_CLK, lmfc_rate_hz / n);
+	ad9528_clk_set_rate(clkchip_device, FPGA_SYSREF_CLK, fpga_ref_clk / 64);
+	ad9528_clk_set_rate(clkchip_device, ADC_SYSREF_CLK, fpga_ref_clk / 64);
 
-			if (app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev))
-				break;
-		}
-
-		if (n == 0) {
-			printf("Could not find suitable SYSREF rate for LMFC of %u\n", lmfc_rate_hz);
-			goto error_1;
-		}
-
-		ret = ad9528_clk_set_rate(clkchip_device, FPGA_SYSREF_CLK, rate_fmc);
-		if (ret)
-			printf("Failed to set FMC SYSREF rate to %u Hz: %d\n",
-			       rate_fmc, ret);
-
-		ret = ad9528_clk_set_rate(clkchip_device, ADC_SYSREF_CLK, rate_dev);
-		if (ret)
-			printf("Failed to set DEV SYSREF rate to %u Hz: %d\n",
-			       rate_fmc, ret);
-	}
+//	/* If the current rate is not OK, change it */
+//	if (!(app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev) &&
+//	      (rate_fmc == rate_dev))) {
+//		/*
+//		* Try to find a rate that integer divides the LMFC. Starting with a low
+//		* rate is a good idea and then slowly go up in case the clock generator
+//		* can't generate such slow rates.
+//		*/
+//		for (n = 64; n > 0; n--) {
+//			rate_dev = ad9528_clk_round_rate(clkchip_device, ADC_SYSREF_CLK, lmfc_rate_hz / n);
+//
+//			if (app_ad9083_check_sysref_rate(lmfc_rate_hz, rate_dev))
+//				break;
+//		}
+//
+//		if (n == 0) {
+//			printf("Could not find suitable SYSREF rate for LMFC of %u\n", lmfc_rate_hz);
+//			goto error_1;
+//		}
+//
+//		ret = ad9528_clk_set_rate(clkchip_device, FPGA_SYSREF_CLK, rate_fmc);
+//		if (ret)
+//			printf("Failed to set FMC SYSREF rate to %u Hz: %d\n",
+//			       rate_fmc, ret);
+//
+//		ret = ad9528_clk_set_rate(clkchip_device, ADC_SYSREF_CLK, rate_dev);
+//		if (ret)
+//			printf("Failed to set DEV SYSREF rate to %u Hz: %d\n",
+//			       rate_fmc, ret);
+//	}
 
 	return SUCCESS;
 

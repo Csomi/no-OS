@@ -77,8 +77,8 @@ int32_t app_jesd_init(void)
 		.octets_per_frame = jtx_param[uc].jesd_f,
 		.frames_per_multiframe = jtx_param[uc].jesd_n,
 		.subclass = jtx_param[uc].jesd_subclass,
-		.device_clk_khz = 184320,	/* (lane_clk_khz / 40) */
-		.lane_clk_khz = 7372800,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
+		.device_clk_khz = 12500,	/* (lane_clk_khz / 40) */
+		.lane_clk_khz = 500000,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
 	};
 
 	struct adxcvr_init rx_adxcvr_init = {
@@ -88,8 +88,8 @@ int32_t app_jesd_init(void)
 		.out_clk_sel = 4,
 		.cpll_enable = 0,
 		.lpm_enable = 1,
-		.lane_rate_khz = 7372800,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
-		.ref_rate_khz = 368640,		/* FPGA_CLK, output 12 of HMC 7044 */
+		.lane_rate_khz = 10000000,	/* LaneRate = ( M/L)*NP*(10/8)*DataRate */
+		.ref_rate_khz = 500000,		/* FPGA_CLK ref */
 	};
 
 	status = axi_jesd204_rx_init(&rx_jesd, &rx_jesd_init);

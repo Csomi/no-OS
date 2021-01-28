@@ -108,7 +108,7 @@ int main(void)
 		return FAILURE;
 	}
 
-	status = axi_jesd204_tx_status_read(rx_jesd);
+	status = axi_jesd204_rx_status_read(rx_jesd);
 	if (status != SUCCESS) {
 		printf("axi_jesd204_tx_status_read() error: %"PRIi32"\n", status);
 	}
