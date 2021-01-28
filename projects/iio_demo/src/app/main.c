@@ -106,6 +106,8 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 	RCC_OscInitStruct.PLL.PLLM = 16;
 	RCC_OscInitStruct.PLL.PLLN = 336;
+	source /opt/Xilinx/SDK/2019.1/settings64.sh
+
 	RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
 	RCC_OscInitStruct.PLL.PLLQ = 2;
 	RCC_OscInitStruct.PLL.PLLR = 2;
